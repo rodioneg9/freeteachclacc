@@ -1,0 +1,15 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+  </Configurations>
+  <Folder Name="/src/">
+    <Project Path="src/FreeTeachClass.App/FreeTeachClass.App.csproj" />
+    <Project Path="src/FreeTeachClass.Application/FreeTeachClass.Application.csproj" />
+    <Project Path="src/FreeTeachClass.Domain/FreeTeachClass.Domain.csproj" />
+    <Project Path="src/FreeTeachClass.Infrastructure/FreeTeachClass.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/FreeTeachClass.Application.Tests/FreeTeachClass.Application.Tests.csproj" />
+    <Project Path="tests/FreeTeachClass.Infrastructure.Tests/FreeTeachClass.Infrastructure.Tests.csproj" />
+  </Folder>
+</Solution>
