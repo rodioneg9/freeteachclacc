@@ -1,0 +1,28 @@
+<Window
+    x:Class="FreeTeachClass.App.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="FreeTeachClass">
+
+    <NavigationView
+        x:Name="NavView"
+        OpenPaneLength="230"
+        IsBackButtonVisible="Collapsed"
+        IsSettingsVisible="False"
+        PaneDisplayMode="Left"
+        SelectionChanged="OnNavSelectionChanged">
+        <NavigationView.MenuItems>
+            <NavigationViewItem Content="🏠 Главная" IsSelected="True" Tag="Dashboard" />
+            <NavigationViewItem Content="📚 Предметы" Tag="Courses" />
+            <NavigationViewItem Content="📝 Задания" Tag="Assignments" />
+            <NavigationViewItem Content="📅 План" Tag="Plan" />
+            <NavigationViewItem Content="🤖 AI-помощник" Tag="Assistant" />
+            <NavigationViewItem Content="🏆 Достижения" Tag="Achievements" />
+        </NavigationView.MenuItems>
+        <NavigationView.FooterMenuItems>
+            <NavigationViewItem Content="⚙️ Настройки" Tag="Settings" />
+        </NavigationView.FooterMenuItems>
+
+        <Grid x:Name="RootGrid" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" />
+    </NavigationView>
+</Window>

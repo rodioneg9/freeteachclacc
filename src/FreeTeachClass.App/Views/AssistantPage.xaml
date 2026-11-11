@@ -1,0 +1,185 @@
+<Page
+    x:Class="FreeTeachClass.App.Views.AssistantPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:FreeTeachClass.App.ViewModels">
+
+    <Grid
+        MaxWidth="980"
+        Padding="24,20,24,24"
+        HorizontalAlignment="Stretch"
+        RowSpacing="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Заголовок -->
+        <Grid ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Spacing="4">
+                <TextBlock Style="{StaticResource PageTitleStyle}" Text="AI-помощник" />
+                <TextBlock
+                    Style="{StaticResource CaptionSecondaryStyle}"
+                    Text="{x:Bind ViewModel.ProviderText, Mode=OneWay}" />
+            </StackPanel>
+
+            <Button
+                Grid.Column="1"
+                VerticalAlignment="Center"
+                Command="{x:Bind ViewModel.OpenSettingsCommand}"
+                Content="Настроить AI" />
+        </Grid>
+
+        <!-- Нет ключа -->
+        <InfoBar
+            Grid.Row="1"
+            IsClosable="False"
+            IsOpen="{x:Bind ViewModel.ShowSetupHint, Mode=OneWay}"
+            Message="Добавьте API-ключ выбранного провайдера — без него запросы не отправляются."
+            Severity="Warning"
+            Title="AI не настроен">
+            <InfoBar.ActionButton>
+                <Button
+                    Command="{x:Bind ViewModel.OpenSettingsCommand}"
+                    Content="Открыть настройки" />
+            </InfoBar.ActionButton>
+        </InfoBar>
+
+        <!-- Переписка -->
+        <Grid Grid.Row="2">
+            <ScrollViewer
+                x:Name="MessagesScroll"
+                Padding="0,4,0,4"
+                VerticalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{x:Bind ViewModel.Messages, Mode=OneWay}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:AiMessageViewModel">
+                            <Border
+                                Margin="0,4,0,4"
+                                Padding="12"
+                                Style="{StaticResource CardStyle}">
+                                <StackPanel Spacing="4">
+                                    <TextBlock
+                                        Style="{StaticResource CaptionSecondaryStyle}"
+                                        Text="{x:Bind Author}" />
+                                    <TextBlock
+                                        IsTextSelectionEnabled="True"
+                                        Style="{StaticResource BodyWrapStyle}"
+                                        Text="{x:Bind Text}" />
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+
+            <StackPanel
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Spacing="8"
+                Visibility="{x:Bind ViewModel.ShowEmptyState, Mode=OneWay, Converter={StaticResource BooleanToVisibility}}">
+                <TextBlock
+                    HorizontalAlignment="Center"
+                    FontSize="40"
+                    Text="🤖" />
+                <TextBlock
+                    FontWeight="SemiBold"
+                    HorizontalAlignment="Center"
+                    Text="Задайте вопрос по учёбе" />
+                <TextBlock
+                    MaxWidth="460"
+                    Opacity="0.65"
+                    Text="Можно спросить про задание, попросить объяснить тему или составить план. История чата не сохраняется на диск."
+                    TextAlignment="Center"
+                    TextWrapping="Wrap" />
+            </StackPanel>
+        </Grid>
+
+        <!-- Контекст задания -->
+        <Border
+            Grid.Row="3"
+            Padding="12"
+            Style="{StaticResource CardStyle}"
+            Visibility="{x:Bind ViewModel.HasContext, Mode=OneWay, Converter={StaticResource BooleanToVisibility}}">
+            <Grid ColumnSpacing="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock
+                    Style="{StaticResource CaptionSecondaryStyle}"
+                    Text="{x:Bind ViewModel.ContextTitle, Mode=OneWay}"
+                    VerticalAlignment="Center" />
+                <Button
+                    Grid.Column="1"
+                    Command="{x:Bind ViewModel.ClearContextCommand}"
+                    Content="Убрать контекст" />
+            </Grid>
+        </Border>
+
+        <!-- Ввод -->
+        <StackPanel Grid.Row="4" Spacing="8">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <Button Command="{x:Bind ViewModel.AskExplainCommand}" Content="Объясни задание" />
+                <Button Command="{x:Bind ViewModel.AskPlanCommand}" Content="Составь план" />
+                <Button Command="{x:Bind ViewModel.AskCheckCommand}" Content="Проверь подход" />
+                <Button Command="{x:Bind ViewModel.ClearChatCommand}" Content="Очистить чат" />
+            </StackPanel>
+
+            <Grid ColumnSpacing="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TextBox
+                    x:Name="InputBox"
+                    MinHeight="72"
+                    MaxHeight="180"
+                    AcceptsReturn="True"
+                    PlaceholderText="Спросите что-нибудь…"
+                    Text="{x:Bind ViewModel.Input, Mode=OneWay}"
+                    TextChanged="OnInputTextChanged"
+                    TextWrapping="Wrap" />
+
+                <StackPanel
+                    Grid.Column="1"
+                    VerticalAlignment="Bottom"
+                    Orientation="Horizontal"
+                    Spacing="8">
+                    <ProgressRing
+                        Width="24"
+                        Height="24"
+                        IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}" />
+                    <Button
+                        Command="{x:Bind ViewModel.SendCommand}"
+                        Content="Отправить"
+                        IsEnabled="{x:Bind ViewModel.CanSend, Mode=OneWay}"
+                        Style="{StaticResource AccentButtonStyle}" />
+                    <Button
+                        Command="{x:Bind ViewModel.SendCancelCommand}"
+                        Content="Отмена"
+                        Visibility="{x:Bind ViewModel.IsBusy, Mode=OneWay, Converter={StaticResource BooleanToVisibility}}" />
+                </StackPanel>
+            </Grid>
+
+            <TextBlock
+                Foreground="{ThemeResource WarningTextBrush}"
+                Style="{StaticResource BodyWrapStyle}"
+                Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}"
+                Visibility="{x:Bind ViewModel.StatusMessage, Mode=OneWay, Converter={StaticResource NullOrEmptyToVisibility}}" />
+
+            <TextBlock
+                Style="{StaticResource CaptionSecondaryStyle}"
+                Text="Ключи хранятся локально и зашифрованы Windows DPAPI. Сообщения отправляются напрямую выбранному AI-провайдеру." />
+        </StackPanel>
+    </Grid>
+</Page>

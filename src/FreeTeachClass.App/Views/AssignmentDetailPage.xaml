@@ -1,0 +1,226 @@
+<Page
+    x:Class="FreeTeachClass.App.Views.AssignmentDetailPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:FreeTeachClass.App.Controls"
+    xmlns:vm="using:FreeTeachClass.App.ViewModels">
+
+    <ScrollViewer>
+        <StackPanel
+            MaxWidth="1100"
+            Padding="24,20,24,24"
+            HorizontalAlignment="Stretch"
+            Spacing="16">
+
+            <Button
+                HorizontalAlignment="Left"
+                Command="{x:Bind ViewModel.BackCommand}"
+                Content="← К заданиям" />
+
+            <TextBlock
+                Opacity="0.6"
+                Style="{StaticResource BodyWrapStyle}"
+                Text="Задание не выбрано."
+                Visibility="{x:Bind ViewModel.HasAssignment, Mode=OneWay, Converter={StaticResource InverseBooleanToVisibility}}" />
+
+            <StackPanel Spacing="4" Visibility="{x:Bind ViewModel.HasAssignment, Mode=OneWay, Converter={StaticResource BooleanToVisibility}}">
+                <controls:LinkTextBlock
+                    FontSize="28"
+                    FontWeight="SemiBold"
+                    Text="{x:Bind ViewModel.Title, Mode=OneWay}" />
+
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                    <TextBlock
+                        Style="{StaticResource CaptionSecondaryStyle}"
+                        Text="{x:Bind ViewModel.CourseName, Mode=OneWay}" />
+                    <TextBlock
+                        Style="{StaticResource CaptionSecondaryStyle}"
+                        Text="{x:Bind ViewModel.DueText, Mode=OneWay}" />
+                    <TextBlock
+                        Style="{StaticResource CaptionSecondaryStyle}"
+                        Text="{x:Bind ViewModel.WorkTypeText, Mode=OneWay}"
+                        Visibility="{x:Bind ViewModel.WorkTypeText, Mode=OneWay, Converter={StaticResource NullOrEmptyToVisibility}}" />
+                    <TextBlock
+                        Style="{StaticResource CaptionSecondaryStyle}"
+                        Text="{x:Bind ViewModel.MaxPointsText, Mode=OneWay}"
+                        Visibility="{x:Bind ViewModel.MaxPointsText, Mode=OneWay, Converter={StaticResource NullOrEmptyToVisibility}}" />
+                </StackPanel>
+            </StackPanel>
+
+            <!-- Сдача работы -->
+            <Border Style="{StaticResource CardStyle}">
+                <StackPanel Spacing="10">
+                    <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Сдача работы" />
+
+                    <Grid ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock
+                            Style="{StaticResource BodyWrapStyle}"
+                            Text="{x:Bind ViewModel.SubmissionStatusText, Mode=OneWay}"
+                            VerticalAlignment="Center" />
+                        <ProgressRing
+                            Grid.Column="1"
+                            Width="24"
+                            Height="24"
+                            IsActive="{x:Bind ViewModel.IsSubmissionBusy, Mode=OneWay}" />
+                    </Grid>
+
+                    <TextBlock
+                        Style="{StaticResource CaptionSecondaryStyle}"
+                        Text="Через API можно сдавать только задания типа «Задание». Для вопросов и тестов используйте сайт Classroom."
+                        Visibility="{x:Bind ViewModel.IsApiSubmissionSupported, Mode=OneWay, Converter={StaticResource InverseBooleanToVisibility}}" />
+
+                    <!-- Уже прикреплённые вложения -->
+                    <StackPanel
+                        Spacing="4"
+                        Visibility="{x:Bind ViewModel.HasExistingAttachments, Mode=OneWay, Converter={StaticResource BooleanToVisibility}}">
+                        <TextBlock Style="{StaticResource CaptionSecondaryStyle}" Text="Уже прикреплено" />
+                        <ItemsControl ItemsSource="{x:Bind ViewModel.SubmissionAttachments, Mode=OneWay}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:AssignmentMaterialViewModel">
+                                    <Grid Margin="0,2,0,2">
+                                        <HyperlinkButton
+                                            Content="{x:Bind Title}"
+                                            NavigateUri="{x:Bind LinkUri}"
+                                            Visibility="{x:Bind IsLink, Converter={StaticResource BooleanToVisibility}}" />
+                                        <TextBlock
+                                            Style="{StaticResource BodyWrapStyle}"
+                                            Text="{x:Bind Title}"
+                                            Visibility="{x:Bind IsLink, Converter={StaticResource InverseBooleanToVisibility}}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+
+                    <StackPanel
+                        Spacing="8"
+                        Visibility="{x:Bind ViewModel.ShowSubmissionForm, Mode=OneWay, Converter={StaticResource BooleanToVisibility}}">
+                        <TextBlock Style="{StaticResource CaptionSecondaryStyle}" Text="Выбранные файлы" />
+                        <ItemsControl ItemsSource="{x:Bind ViewModel.SelectedFiles, Mode=OneWay}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:SubmissionFileViewModel">
+                                    <Grid Margin="0,2,0,2" ColumnSpacing="8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Spacing="1">
+                                            <TextBlock Style="{StaticResource BodyWrapStyle}" Text="{x:Bind Title}" />
+                                            <TextBlock Style="{StaticResource CaptionSecondaryStyle}" Text="{x:Bind SizeText}" />
+                                        </StackPanel>
+                                        <Button
+                                            Grid.Column="1"
+                                            Click="OnRemoveFileClick"
+                                            Content="Удалить"
+                                            Tag="{x:Bind Path}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button
+                                Click="OnAddFilesClick"
+                                Content="Прикрепить файлы"
+                                IsEnabled="{x:Bind ViewModel.CanAddFiles, Mode=OneWay}" />
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                Style="{StaticResource CaptionSecondaryStyle}"
+                                Text="До 20 вложений" />
+                        </StackPanel>
+
+                        <TextBox
+                            x:Name="SubmissionLinkBox"
+                            Header="Ссылка (необязательно)"
+                            PlaceholderText="https://…"
+                            Text="{x:Bind ViewModel.SubmissionLink, Mode=OneWay}"
+                            TextChanged="OnSubmissionLinkTextChanged" />
+
+                        <Button
+                            Click="OnSubmitClick"
+                            Content="Сдать работу"
+                            IsEnabled="{x:Bind ViewModel.CanSubmit, Mode=OneWay}"
+                            Style="{StaticResource AccentButtonStyle}" />
+                    </StackPanel>
+
+                    <InfoBar
+                        IsClosable="False"
+                        IsOpen="{x:Bind ViewModel.HasSubmissionWarning, Mode=OneWay}"
+                        Message="{x:Bind ViewModel.SubmissionWarning, Mode=OneWay}"
+                        Severity="Warning"
+                        Title="Обратите внимание" />
+
+                    <HyperlinkButton
+                        Content="Открыть задание в Classroom"
+                        NavigateUri="{x:Bind ViewModel.ClassroomUri, Mode=OneWay}"
+                        Visibility="{x:Bind ViewModel.ShowWebFallback, Mode=OneWay, Converter={StaticResource BooleanToVisibility}}" />
+
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Button
+                            Command="{x:Bind ViewModel.AskAssistantCommand}"
+                            Content="Спросить AI" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Описание -->
+            <Border Style="{StaticResource CardStyle}">
+                <StackPanel Spacing="8">
+                    <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Описание" />
+                    <controls:LinkTextBlock Text="{x:Bind ViewModel.Description, Mode=OneWay}" />
+                    <TextBlock
+                        Opacity="0.6"
+                        Style="{StaticResource BodyWrapStyle}"
+                        Text="Описание не указано."
+                        Visibility="{x:Bind ViewModel.HasDescription, Mode=OneWay, Converter={StaticResource InverseBooleanToVisibility}}" />
+                </StackPanel>
+            </Border>
+
+            <!-- Вложения -->
+            <Border
+                Style="{StaticResource CardStyle}"
+                Visibility="{x:Bind ViewModel.HasMaterials, Mode=OneWay, Converter={StaticResource BooleanToVisibility}}">
+                <StackPanel Spacing="8">
+                    <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Вложения" />
+                    <ItemsControl ItemsSource="{x:Bind ViewModel.Materials, Mode=OneWay}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:AssignmentMaterialViewModel">
+                                <Grid Margin="0,4,0,4" ColumnSpacing="12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel Spacing="2">
+                                        <HyperlinkButton
+                                            Content="{x:Bind Title}"
+                                            NavigateUri="{x:Bind LinkUri}"
+                                            Visibility="{x:Bind IsLink, Converter={StaticResource BooleanToVisibility}}" />
+                                        <TextBlock
+                                            Style="{StaticResource BodyWrapStyle}"
+                                            Text="{x:Bind Title}"
+                                            Visibility="{x:Bind IsLink, Converter={StaticResource InverseBooleanToVisibility}}" />
+                                        <TextBlock
+                                            Style="{StaticResource CaptionSecondaryStyle}"
+                                            Text="{x:Bind HostText}"
+                                            Visibility="{x:Bind HostText, Converter={StaticResource NullOrEmptyToVisibility}}" />
+                                    </StackPanel>
+
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        VerticalAlignment="Center"
+                                        Style="{StaticResource CaptionSecondaryStyle}"
+                                        Text="{x:Bind KindText}" />
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

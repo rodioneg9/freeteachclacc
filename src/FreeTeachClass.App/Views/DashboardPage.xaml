@@ -1,0 +1,143 @@
+<Page
+    x:Class="FreeTeachClass.App.Views.DashboardPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:FreeTeachClass.App.Controls"
+    xmlns:vm="using:FreeTeachClass.App.ViewModels">
+
+    <ScrollViewer>
+        <StackPanel
+            MaxWidth="1100"
+            Padding="24,20,24,24"
+            HorizontalAlignment="Stretch"
+            Spacing="20">
+
+            <Grid>
+                <StackPanel Spacing="2">
+                    <TextBlock Style="{StaticResource PageTitleStyle}" Text="{x:Bind ViewModel.UserName, Mode=OneWay}" />
+                    <TextBlock Style="{StaticResource CaptionSecondaryStyle}" Text="{x:Bind ViewModel.LastSyncText, Mode=OneWay}" />
+                </StackPanel>
+                <Button
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
+                    Command="{x:Bind ViewModel.RefreshCommand}"
+                    Content="Обновить" />
+            </Grid>
+
+            <TextBlock
+                Foreground="{ThemeResource WarningTextBrush}"
+                Style="{StaticResource BodyWrapStyle}"
+                Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}"
+                Visibility="{x:Bind ViewModel.StatusMessage, Mode=OneWay, Converter={StaticResource NullOrEmptyToVisibility}}" />
+
+            <!-- Статистика -->
+            <Grid ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="4">
+                        <TextBlock Style="{StaticResource CaptionSecondaryStyle}" Text="Предметов" />
+                        <TextBlock Style="{StaticResource StatValueStyle}" Text="{x:Bind ViewModel.CourseCountText, Mode=OneWay}" />
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="1" Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="4">
+                        <TextBlock Style="{StaticResource CaptionSecondaryStyle}" Text="Активных заданий" />
+                        <TextBlock Style="{StaticResource StatValueStyle}" Text="{x:Bind ViewModel.ActiveAssignmentCountText, Mode=OneWay}" />
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="2" Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="4">
+                        <TextBlock Style="{StaticResource CaptionSecondaryStyle}" Text="Ближайший дедлайн" />
+                        <TextBlock
+                            Style="{StaticResource StatValueStyle}"
+                            Text="{x:Bind ViewModel.NearestDeadlineText, Mode=OneWay}"
+                            TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- Сегодня -->
+            <StackPanel>
+                <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Сегодня" />
+
+                <TextBlock
+                    Opacity="0.6"
+                    Style="{StaticResource BodyWrapStyle}"
+                    Text="Сегодня дедлайнов нет 🎉"
+                    Visibility="{x:Bind ViewModel.HasNoTodayEntries, Mode=OneWay}" />
+
+                <ItemsControl ItemsSource="{x:Bind ViewModel.TodayEntries, Mode=OneWay}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:TodayEntryViewModel">
+                            <Border Margin="0,0,0,8" Style="{StaticResource CardStyle}">
+                                <Grid ColumnSpacing="12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Spacing="2">
+                                        <controls:LinkTextBlock
+                                            FontWeight="SemiBold"
+                                            Text="{x:Bind Title}" />
+                                        <TextBlock Style="{StaticResource CaptionSecondaryStyle}" Text="{x:Bind CourseName}" />
+                                        <HyperlinkButton
+                                            HorizontalAlignment="Left"
+                                            Command="{x:Bind OpenCommand}"
+                                            Content="Подробнее" />
+                                    </StackPanel>
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        VerticalAlignment="Center"
+                                        Text="{x:Bind DueText}">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Foreground" Value="{ThemeResource SubtleTextBrush}" />
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+
+            <!-- Заглушки будущих функций -->
+            <Grid ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="🤖 AI-помощник" FontWeight="SemiBold" />
+                        <TextBlock Style="{StaticResource CaptionSecondaryStyle}" Text="Поможет разобраться с заданиями. Скоро." />
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="1" Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="🏆 XP и достижения" FontWeight="SemiBold" />
+                        <TextBlock Style="{StaticResource CaptionSecondaryStyle}" Text="Учёба становится игрой. Скоро." />
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="2" Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="📅 Планёрка" FontWeight="SemiBold" />
+                        <TextBlock Style="{StaticResource CaptionSecondaryStyle}" Text="Расписание учёбы без головной боли. Скоро." />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </StackPanel>
+    </ScrollViewer>
+</Page>
